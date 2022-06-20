@@ -1,7 +1,10 @@
 JSON			=	./build/main.json
 NETWORK			=	alpha-goerli
 
-all:	build
+all:
+
+install:
+	pip install -r requirements.txt
 
 build:
 	protostar build
@@ -15,6 +18,6 @@ test:
 clean:
 	rm -rf ./build
 
-re:	clean all
+re:	clean build
 
-.Phony: all deploy test clean re
+.Phony: all install builddeploy test clean re
