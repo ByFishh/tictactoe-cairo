@@ -6,7 +6,7 @@ all:
 install:
 	pip install -r requirements.txt
 
-build:
+build: clean
 	protostar build
 
 deploy:
