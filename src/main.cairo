@@ -33,6 +33,120 @@ func get_content{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return (content)
 end
 
+func check_horizontal_line{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    y : felt
+) -> (res : felt):
+    alloc_locals
+    if y == 3:
+        return (0)
+    end
+
+    local syscall_ptr : felt* = syscall_ptr
+
+    let (tmp_0) = grid.read(0, y)
+    let (tmp_1) = grid.read(1, y)
+    let (tmp_2) = grid.read(2, y)
+
+    if tmp_0 == 0:
+        return (0)
+    end
+
+    if tmp_0 == tmp_1:
+        if tmp_1 == tmp_2:
+            return (1)
+        end
+    end
+    let (tmp) = check_horizontal_line(y + 1)
+    return (tmp)
+end
+
+func check_vertical_line{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    x : felt
+) -> (res : felt):
+    alloc_locals
+
+    local syscall_ptr : felt* = syscall_ptr
+
+    let (tmp_0) = grid.read(x, 0)
+    let (tmp_1) = grid.read(x, 1)
+    let (tmp_2) = grid.read(x, 2)
+
+    if tmp_0 == 0:
+        return (0)
+    end
+
+    if tmp_0 == tmp_1:
+        if tmp_1 == tmp_2:
+            return (1)
+        end
+    end
+    let (tmp) = check_horizontal_line(x + 1)
+    return (tmp)
+end
+
+func check_diag1{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+) -> (res : felt):
+    alloc_locals
+    local syscall_ptr : felt* = syscall_ptr
+
+    let (tmp_0) = grid.read(0, 0)
+    let (tmp_1) = grid.read(1, 1)
+    let (tmp_2) = grid.read(2, 2)
+
+    if tmp_0 == 0:
+        return (0)
+    end
+
+    if tmp_0 == tmp_1:
+        if tmp_1 == tmp_2:
+            return (1)
+        end
+    end
+    return (0)
+end
+
+func check_diag2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+) -> (res : felt):
+    alloc_locals
+    local syscall_ptr : felt* = syscall_ptr
+
+    let (tmp_0) = grid.read(2, 0)
+    let (tmp_1) = grid.read(1, 1)
+    let (tmp_2) = grid.read(0, 2)
+
+    if tmp_0 == 0:
+        return (0)
+    end
+
+    if tmp_0 == tmp_1:
+        if tmp_1 == tmp_2:
+            return (1)
+        end
+    end
+    return (0)
+end
+
+func win_condition{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+) -> (res : felt):
+    let (tmp) = check_horizontal_line(0)
+    if tmp == 1:
+        return (1)
+    end
+    let (tmp) = check_vertical_line(0)
+    if tmp == 1:
+        return (1)
+    end
+    let (tmp) = check_diag1()
+    if tmp == 1:
+        return (1)
+    end
+    let (tmp) = check_diag2()
+    if tmp == 1:
+        return (1)
+    end
+    return (0)
+end
+
 func is_invalid_pos{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     x : felt, y : felt
 ) -> (res : felt):
@@ -55,6 +169,12 @@ func place_cross{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     turn.write(1)
     grid.write(x, y, 1)
 
+    let (tmp) = win_condition()
+    if tmp == 1:
+        finish.write(1)
+        winner.write(1)
+        return ()
+    end
     return ()
 end
 
@@ -71,5 +191,11 @@ func place_circle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     turn.write(0)
     grid.write(x, y, 2)
 
+    let (tmp) = win_condition()
+    if tmp == 1:
+        finish.write(1)
+        winner.write(2)
+        return ()
+    end
     return ()
 end
