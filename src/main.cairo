@@ -26,6 +26,12 @@ func is_finish{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 end
 
 @view
+func get_winner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (content : felt):
+    let (tmp) = winner.read()
+    return (tmp)
+end
+
+@view
 func get_content{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     x : felt, y : felt
 ) -> (content : felt):
@@ -175,6 +181,27 @@ func place_cross{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
         winner.write(1)
         return ()
     end
+    return ()
+end
+
+@external
+func restart{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> ():
+    let (tmp) = finish.read()
+    with_attr error_message(
+        "This game is currently running !"):
+        assert tmp = 1
+    end
+    grid.write(0, 0, 0)
+    grid.write(0, 1, 0)
+    grid.write(0, 2, 0)
+    grid.write(1, 0, 0)
+    grid.write(1, 1, 0)
+    grid.write(1, 2, 0)
+    grid.write(2, 0, 0)
+    grid.write(2, 1, 0)
+    grid.write(2, 2, 0)
+    finish.write(0)
+    winner.write(0)
     return ()
 end
 
