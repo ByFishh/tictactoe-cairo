@@ -19,6 +19,10 @@ end
 func finish() -> (res : felt):
 end
 
+@storage_var
+func count() -> (value):
+end
+
 @view
 func is_finish{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (content : felt):
     let (content) = finish.read()
@@ -163,28 +167,6 @@ func is_invalid_pos{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 end
 
 @external
-func place_cross{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    x : felt, y : felt
-) -> ():
-    let (tmp) = finish.read()
-    assert tmp = 0
-    let (tmp) = is_invalid_pos(x, y)
-    assert tmp = 0
-    let (tmp) = turn.read()
-    assert tmp = 0
-    turn.write(1)
-    grid.write(x, y, 1)
-
-    let (tmp) = win_condition()
-    if tmp == 1:
-        finish.write(1)
-        winner.write(1)
-        return ()
-    end
-    return ()
-end
-
-@external
 func restart{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> ():
     let (tmp) = finish.read()
     with_attr error_message(
@@ -206,6 +188,34 @@ func restart{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 end
 
 @external
+func place_cross{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    x : felt, y : felt
+) -> ():
+    let (tmp) = finish.read()
+    assert tmp = 0
+    let (tmp) = is_invalid_pos(x, y)
+    assert tmp = 0
+    let (tmp) = turn.read()
+    assert tmp = 0
+    turn.write(1)
+    grid.write(x, y, 1)
+
+    let (tmp) = win_condition()
+    if tmp == 1:
+        finish.write(1)
+        winner.write(1)
+        return ()
+    end
+    let (tmp) = count.read()
+    count.write(tmp + 1)
+    if tmp == 9:
+        finish.write(1)
+        return ()
+    end
+    return ()
+end
+
+@external
 func place_circle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     x : felt, y : felt
 ) -> ():
@@ -222,6 +232,12 @@ func place_circle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     if tmp == 1:
         finish.write(1)
         winner.write(2)
+        return ()
+    end
+    let (tmp) = count.read()
+    count.write(tmp + 1)
+    if tmp == 9:
+        finish.write(1)
         return ()
     end
     return ()
